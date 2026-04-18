@@ -1,0 +1,46 @@
+# python -m faraday_bivector_sdr.cli.fbsdr examples/bladerf_rx_2425.yaml
+devices:
+  - id: brf
+    adapter: soapy
+    args: "driver=bladerf"
+    rx_channels:
+      - channel: 0
+        center_freq_hz: 2425000000.0
+        sample_rate_hz: 2000000.0
+        bandwidth_hz: 2000000.0
+        gain_db: 0
+        block_size: 8192
+      - channel: 1
+        center_freq_hz: 2425000000.0
+        sample_rate_hz: 2000000.0
+        bandwidth_hz: 2000000.0
+        gain_db: 0
+        block_size: 8192
+
+projections:
+  - id: RX_V   # your Rx1=V
+    device: brf
+    channel: 0
+  - id: RX_H   # your Rx2=H
+    device: brf
+    channel: 1
+
+pipelines:
+  - id: spec_v
+    input: RX_V
+    ops:
+      - spectrum: {fft_size: 4096, avg: 8}
+  - id: spec_h
+    input: RX_H
+    ops:
+      - spectrum: {fft_size: 4096, avg: 8}
+
+outputs:
+  - type: spectrum_console
+    pipeline: spec_v
+    frames: 10
+    topk: 5
+  - type: spectrum_console
+    pipeline: spec_h
+    frames: 10
+    topk: 5

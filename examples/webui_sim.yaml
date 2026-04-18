@@ -1,0 +1,44 @@
+devices:
+  - id: sim
+    adapter: sim
+    rx_channels:
+      - center_freq_hz: 100000000.0
+        sample_rate_hz: 1000000.0
+        bandwidth_hz: 1000000.0
+        block_size: 4096
+        tone_offsets_hz: [100000.0, -200000.0]
+        amplitudes: [1.0, 0.6]
+        noise_std: 0.01
+        seed: 42
+        max_frames: 1000000
+
+projections:
+  - id: p0
+    device: sim
+    channel: 0
+
+pipelines:
+  - id: pipe_view
+    input: p0
+    ops:
+      - dyn_frequency_shift: {param: "offset_hz"}
+      - dyn_gain: {param: "gain_db", unit: "db"}
+      - spectrum: {fft_size: 4096, avg: 4}
+
+outputs:
+  - type: webui
+    port: 8765
+    hold: true
+    params:
+      - {name: "offset_hz", label: "Frequency Offset (Hz)", min: -300000, max: 300000, step: 100, init: 0}
+      - {name: "gain_db", label: "Gain (dB)", min: -30, max: 30, step: 1, init: 0}
+    devices: [
+      {id: "sim", adapter: "sim", controls: [
+        {"field": "center_freq", "channel": 0, "min": 99500000, "max": 100500000, "step": 1000, "init": 100000000},
+        {"field": "bandwidth",   "channel": 0, "min": 100000,  "max": 1000000,  "step": 1000, "init": 1000000},
+        {"field": "gain",        "channel": 0, "min": 0,       "max": 50,       "step": 1,    "init": 0}
+      ]}
+    ]
+    taps: [
+      {"pipeline": "pipe_view", "type": "spectrum", "id": "main"}
+    ]

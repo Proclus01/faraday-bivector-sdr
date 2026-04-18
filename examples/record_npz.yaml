@@ -1,0 +1,31 @@
+devices:
+  - id: sim1
+    adapter: sim
+    rx_channels:
+      - center_freq_hz: 915000000.0
+        sample_rate_hz: 1000000.0
+        bandwidth_hz: 1000000.0
+        block_size: 4096
+        tone_offsets_hz: [50000.0]
+        amplitudes: [1.0]
+        noise_std: 0.01
+        seed: 7
+        max_frames: 16
+
+projections:
+  - id: p1
+    device: sim1
+    channel: 0
+
+pipelines:
+  - id: pipe_iq
+    input: p1
+    ops:
+      - bandpass: {low_hz: 1000.0, high_hz: 200000.0, taps: 129}
+      - decimate: {factor: 2}
+
+outputs:
+  - type: record_npz
+    source: pipe_iq
+    path: "capture_example.npz"
+    max_frames: 8

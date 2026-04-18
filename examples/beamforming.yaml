@@ -1,0 +1,49 @@
+devices:
+  - id: sim_array
+    adapter: sim
+    rx_channels:
+      - center_freq_hz: 1000000000.0
+        sample_rate_hz: 2000000.0
+        bandwidth_hz: 2000000.0
+        block_size: 4096
+        tone_offsets_hz: [100000.0]
+        amplitudes: [1.0]
+        initial_phases_rad: [0.0]
+        integer_sample_delay: 0
+        noise_std: 0.0
+        seed: 1
+        max_frames: 64
+      - center_freq_hz: 1000000000.0
+        sample_rate_hz: 2000000.0
+        bandwidth_hz: 2000000.0
+        block_size: 4096
+        tone_offsets_hz: [100000.0]
+        amplitudes: [1.0]
+        initial_phases_rad: [1.0471975512]
+        integer_sample_delay: 0
+        noise_std: 0.0
+        seed: 2
+        max_frames: 64
+
+projections:
+  - id: e1
+    device: sim_array
+    channel: 0
+  - id: e2
+    device: sim_array
+    channel: 1
+
+pipelines:
+  - id: pipe_bf
+    inputs: [e1, e2]
+    ops:
+      - align_time_phase: {}
+      - beamform_narrowband: {element_positions_m: [[0.0,0.0,0.0],[0.1,0.0,0.0]], az_deg: 90.0, el_deg: 0.0}
+      - bandpass: {low_hz: 50000.0, high_hz: 150000.0, taps: 129}
+      - spectrum: {fft_size: 4096, avg: 4}
+
+outputs:
+  - type: html_waterfall
+    pipeline: pipe_bf
+    path: "beamforming_waterfall.html"
+    frames: 8

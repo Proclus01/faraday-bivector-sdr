@@ -1,0 +1,31 @@
+devices:
+  - id: sim1
+    adapter: sim
+    rx_channels:
+      - center_freq_hz: 100000000.0
+        sample_rate_hz: 1000000.0
+        bandwidth_hz: 1000000.0
+        block_size: 4096
+        tone_offsets_hz: [100000.0, -200000.0]
+        amplitudes: [1.0, 0.6]
+        noise_std: 0.01
+        seed: 42
+        max_frames: 64
+
+projections:
+  - id: p1
+    device: sim1
+    channel: 0
+
+pipelines:
+  - id: pipe_spectrum
+    input: p1
+    ops:
+      - bandpass: {low_hz: 10000.0, high_hz: 300000.0, taps: 257}
+      - spectrum: {fft_size: 4096, avg: 4}
+
+outputs:
+  - type: spectrum_console
+    pipeline: pipe_spectrum
+    frames: 6
+    topk: 2

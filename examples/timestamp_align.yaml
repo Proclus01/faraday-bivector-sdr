@@ -1,0 +1,46 @@
+devices:
+  - id: simalign
+    adapter: sim
+    rx_channels:
+      - center_freq_hz: 100000000.0
+        sample_rate_hz: 1000000.0
+        bandwidth_hz: 1000000.0
+        block_size: 2048
+        tone_offsets_hz: [100000.0]
+        amplitudes: [1.0]
+        noise_std: 0.0
+        integer_sample_delay: 0
+        seed: 10
+        max_frames: 16
+      - center_freq_hz: 100000000.0
+        sample_rate_hz: 1000000.0
+        bandwidth_hz: 1000000.0
+        block_size: 2048
+        tone_offsets_hz: [100000.0]
+        amplitudes: [1.0]
+        noise_std: 0.0
+        integer_sample_delay: 512
+        seed: 11
+        max_frames: 16
+
+projections:
+  - id: A
+    device: simalign
+    channel: 0
+  - id: B
+    device: simalign
+    channel: 1
+
+pipelines:
+  - id: align_and_spec
+    inputs: [A, B]
+    ops:
+      - align_time_phase: {}
+      - beamform_narrowband: {element_positions_m: [[0.0,0.0,0.0],[0.1,0.0,0.0]], az_deg: 0.0, el_deg: 0.0}
+      - spectrum: {fft_size: 2048, avg: 4}
+
+outputs:
+  - type: spectrum_console
+    pipeline: align_and_spec
+    frames: 4
+    topk: 2

@@ -1,0 +1,84 @@
+devices:
+  - id: simHH
+    adapter: sim
+    rx_channels:
+      - center_freq_hz: 2400000000.0
+        sample_rate_hz: 1000000.0
+        bandwidth_hz: 1000000.0
+        block_size: 1024
+        tone_offsets_hz: [20000.0]
+        amplitudes: [1.0]
+        noise_std: 0.02
+        seed: 1
+        max_frames: 128
+  - id: simHV
+    adapter: sim
+    rx_channels:
+      - center_freq_hz: 2400000000.0
+        sample_rate_hz: 1000000.0
+        bandwidth_hz: 1000000.0
+        block_size: 1024
+        tone_offsets_hz: [20500.0]
+        amplitudes: [0.5]
+        noise_std: 0.02
+        seed: 2
+        max_frames: 128
+  - id: simVH
+    adapter: sim
+    rx_channels:
+      - center_freq_hz: 2400000000.0
+        sample_rate_hz: 1000000.0
+        bandwidth_hz: 1000000.0
+        block_size: 1024
+        tone_offsets_hz: [19500.0]
+        amplitudes: [0.6]
+        noise_std: 0.02
+        seed: 3
+        max_frames: 128
+  - id: simVV
+    adapter: sim
+    rx_channels:
+      - center_freq_hz: 2400000000.0
+        sample_rate_hz: 1000000.0
+        bandwidth_hz: 1000000.0
+        block_size: 1024
+        tone_offsets_hz: [20000.0]
+        amplitudes: [0.8]
+        noise_std: 0.02
+        seed: 4
+        max_frames: 128
+
+projections:
+  - {id: HH, device: simHH, channel: 0}
+  - {id: HV, device: simHV, channel: 0}
+  - {id: VH, device: simVH, channel: 0}
+  - {id: VV, device: simVV, channel: 0}
+
+pipelines:
+  - id: RD_HH
+    input: HH
+    ops:
+      - range_doppler: {n_fast: 1024, n_slow: 32, window_fast: "hann", window_slow: "hann", mode: "pulsed"}
+  - id: RD_HV
+    input: HV
+    ops:
+      - range_doppler: {n_fast: 1024, n_slow: 32, window_fast: "hann", window_slow: "hann", mode: "pulsed"}
+  - id: RD_VH
+    input: VH
+    ops:
+      - range_doppler: {n_fast: 1024, n_slow: 32, window_fast: "hann", window_slow: "hann", mode: "pulsed"}
+  - id: RD_VV
+    input: VV
+    ops:
+      - range_doppler: {n_fast: 1024, n_slow: 32, window_fast: "hann", window_slow: "hann", mode: "pulsed"}
+
+  - id: POLMAP
+    inputs: [RD_HH, RD_HV, RD_VH, RD_VV]
+    ops:
+      - polmap: {metrics: ["span", "copol_ratio", "xpol_ratio"], pri_s: 0.001}
+
+outputs:
+  - type: html_polmap
+    pipeline: POLMAP
+    path: "polmap.html"
+    frames: 1

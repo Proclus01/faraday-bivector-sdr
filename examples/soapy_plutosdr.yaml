@@ -1,0 +1,28 @@
+devices:
+  - id: pld
+    adapter: soapy
+    args: "driver=plutosdr"
+    rx_channels:
+      - channel: 0
+        center_freq_hz: 2400000000.0
+        sample_rate_hz: 2000000.0
+        bandwidth_hz: 2000000.0
+        gain_db: 20
+        block_size: 8192
+
+projections:
+  - id: p0
+    device: pld
+    channel: 0
+
+pipelines:
+  - id: spectrum
+    input: p0
+    ops:
+      - spectrum: {fft_size: 4096, avg: 8}
+
+outputs:
+  - type: spectrum_console
+    pipeline: spectrum
+    frames: 8
+    topk: 3

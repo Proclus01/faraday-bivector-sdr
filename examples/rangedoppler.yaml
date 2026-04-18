@@ -1,0 +1,30 @@
+devices:
+  - id: sim1
+    adapter: sim
+    rx_channels:
+      - center_freq_hz: 2400000000.0
+        sample_rate_hz: 1000000.0
+        bandwidth_hz: 1000000.0
+        block_size: 1024
+        tone_offsets_hz: [20000.0]
+        amplitudes: [1.0]
+        noise_std: 0.01
+        seed: 5
+        max_frames: 64
+
+projections:
+  - id: p1
+    device: sim1
+    channel: 0
+
+pipelines:
+  - id: pipe_rd
+    input: p1
+    ops:
+      - range_doppler: {n_fast: 1024, n_slow: 32, window_fast: "hann", window_slow: "hann", mode: "pulsed"}
+
+outputs:
+  - type: html_rangedoppler
+    pipeline: pipe_rd
+    path: "range_doppler.html"
+    frames: 1

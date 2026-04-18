@@ -1,0 +1,32 @@
+devices:
+  - id: sim1
+    adapter: sim
+    rx_channels:
+      - center_freq_hz: 2400000000.0
+        sample_rate_hz: 2000000.0
+        bandwidth_hz: 2000000.0
+        block_size: 2048
+        # Sim uses tones; dechirp_local is demo-only here (real FMCW needs TX + target mixing)
+        tone_offsets_hz: [20000.0]
+        amplitudes: [1.0]
+        noise_std: 0.01
+        seed: 123
+        max_frames: 64
+
+projections:
+  - id: p1
+    device: sim1
+    channel: 0
+
+pipelines:
+  - id: pipe_fmcw
+    input: p1
+    ops:
+      - dechirp_local: {sweep_bw_hz: 500000.0, sweep_time_s: 0.010}
+      - spectrum: {fft_size: 2048, avg: 8}
+
+outputs:
+  - type: spectrum_console
+    pipeline: pipe_fmcw
+    frames: 8
+    topk: 3

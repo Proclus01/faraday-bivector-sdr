@@ -1,0 +1,8 @@
+Metadata-Version: 2.4
+Name: faraday-bivector-sdr
+Version: 0.1.0
+Summary: A Faraday-bivector-centric SDR framework with hexagonal architecture.
+Author: Your Name
+Requires-Python: >=3.9
+Requires-Dist: numpy>=1.24
+Requires-Dist: pyyaml>=6.0

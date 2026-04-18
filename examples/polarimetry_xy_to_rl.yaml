@@ -1,0 +1,46 @@
+devices:
+  - id: sim2
+    adapter: sim
+    rx_channels:
+      - center_freq_hz: 1575420000.0
+        sample_rate_hz: 2000000.0
+        bandwidth_hz: 2000000.0
+        block_size: 4096
+        tone_offsets_hz: [100000.0]
+        amplitudes: [1.0]
+        noise_std: 0.0
+        seed: 1
+        max_frames: 32
+      - center_freq_hz: 1575420000.0
+        sample_rate_hz: 2000000.0
+        bandwidth_hz: 2000000.0
+        block_size: 4096
+        tone_offsets_hz: [100000.0]
+        amplitudes: [1.0]
+        # make Y = jX => RHCP
+        initial_phases_rad: [1.57079632679]
+        noise_std: 0.0
+        seed: 2
+        max_frames: 32
+
+projections:
+  - id: X
+    device: sim2
+    channel: 0
+  - id: Y
+    device: sim2
+    channel: 1
+
+pipelines:
+  - id: rl_streams
+    inputs: [X, Y]
+    ops:
+      - pol_xy_to_rl: {}
+      - select: {index: 0}    # R
+      - spectrum: {fft_size: 2048, avg: 4}
+
+outputs:
+  - type: spectrum_console
+    pipeline: rl_streams
+    frames: 4
+    topk: 2
